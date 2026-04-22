@@ -15,6 +15,10 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+vercel.env
+vercel-env.js
+vercel-test.js
+*.env.js
 
 # Debug
 npm-debug.log*
