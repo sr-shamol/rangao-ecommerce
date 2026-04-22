@@ -6,10 +6,14 @@ export async function getProducts(options?: {
   combo?: boolean;
   limit?: number;
 }) {
+  if (!supabase) {
+    console.warn('Supabase not configured');
+    return [];
+  }
+
   let query = supabase
     .from('products')
-    .select('*')
-    .eq('is_featured', true);
+    .select('*');
 
   if (options?.category) {
     query = query.eq('category_id', options.category);
@@ -38,6 +42,8 @@ export async function getProducts(options?: {
 }
 
 export async function getProductBySlug(slug: string) {
+  if (!supabase) return null;
+
   const { data, error } = await supabase
     .from('products')
     .select('*')
@@ -53,6 +59,8 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function getCategories() {
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from('categories')
     .select('*')
@@ -67,6 +75,8 @@ export async function getCategories() {
 }
 
 export async function getCategoryBySlug(slug: string) {
+  if (!supabase) return null;
+
   const { data, error } = await supabase
     .from('categories')
     .select('*')
@@ -82,6 +92,8 @@ export async function getCategoryBySlug(slug: string) {
 }
 
 export async function getAreas() {
+  if (!supabase) return [];
+
   const { data, error } = await supabase
     .from('areas')
     .select('*')
@@ -107,6 +119,8 @@ export async function createOrder(orderData: {
   total: number;
   items: { product_id: string; quantity: number; price: number; variant?: string }[];
 }) {
+  if (!supabase) return null;
+
   const orderId = `RNG-${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
   const { data: order, error: orderError } = await supabase
@@ -152,6 +166,8 @@ export async function createOrder(orderData: {
 }
 
 export async function getOrders(phone?: string) {
+  if (!supabase) return [];
+
   let query = supabase
     .from('orders')
     .select('*, order_items(*)')
@@ -172,6 +188,8 @@ export async function getOrders(phone?: string) {
 }
 
 export async function getOrderById(orderId: string) {
+  if (!supabase) return null;
+
   const { data, error } = await supabase
     .from('orders')
     .select('*, order_items(*), areas(*)')
@@ -187,6 +205,8 @@ export async function getOrderById(orderId: string) {
 }
 
 export async function validateCoupon(code: string, subtotal: number) {
+  if (!supabase) return { valid: false, discount: 0 };
+
   const { data, error } = await supabase
     .from('coupons')
     .select('*')
