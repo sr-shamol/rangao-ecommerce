@@ -2,12 +2,11 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  
   const adminPaths = ['/admin'];
   const apiAdminPaths = ['/api/admin'];
   
-  const pathname = request.nextUrl.pathname;
-  
-  // Check if it's an admin path
   const isAdminPath = adminPaths.some(path => pathname.startsWith(path));
   const isApiAdminPath = apiAdminPaths.some(path => pathname.startsWith(path));
   
@@ -15,20 +14,16 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // Check for admin session cookie
   const adminSession = request.cookies.get('admin_session');
   
-  // Allow /admin and /api/admin/auth without session for login
   if (pathname === '/admin/login' || pathname === '/api/admin/auth') {
     return NextResponse.next();
   }
   
-  // Redirect to login if no session for admin pages
   if (isAdminPath && adminSession?.value !== 'true') {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
   
-  // Return 401 for API without session
   if (isApiAdminPath && adminSession?.value !== 'true') {
     return NextResponse.json(
       { success: false, error: 'Unauthorized' },
@@ -36,7 +31,13 @@ export function middleware(request: NextRequest) {
     );
   }
   
-  return NextResponse.next();
+  const response = NextResponse.next();
+  response.headers.set('X-Content-Type-Options', 'nosniff');
+  response.headers.set('X-Frame-Options', 'DENY');
+  response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  return response;
 }
 
 export const config = {

@@ -85,8 +85,9 @@ export default function CartPage() {
                           <div className="flex items-center justify-between mt-3">
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => updateQuantity(item.product.id, item.quantity - 1, item.variant?.id)}
-                                className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors"
+                                onClick={() => item.quantity > 1 && updateQuantity(item.product.id, item.quantity - 1, item.variant?.id)}
+                                disabled={item.quantity <= 1}
+                                className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
                               >
                                 <Minus size={14} />
                               </button>

@@ -3,7 +3,36 @@ import { supabaseAdmin } from '@/lib/admin';
 import { checkFraud, sendOrderConfirmationSMS, sendAbandonedCartSMS, sendFacebookEvent, getSettings, autoAssignCourier, sendSMS } from '@/lib/admin';
 import { generateOrderId, isValidPhone } from '@/lib/utils';
 
+const ipRequests = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT = 10;
+const RATE_WINDOW = 60000;
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+  const record = ipRequests.get(ip);
+  if (!record || now > record.resetAt) {
+    ipRequests.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
+    return true;
+  }
+  if (record.count >= RATE_LIMIT) return false;
+  record.count++;
+  return true;
+}
+
+function sanitizeString(str: string | undefined, maxLen: number = 500): string {
+  if (!str) return '';
+  return String(str).slice(0, maxLen).replace(/[<>]/g, '');
+}
+
 export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+  if (!checkRateLimit(ip)) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests. Please wait.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await request.json();
     const {
@@ -34,6 +63,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (items.length > 20 || items.some((i: any) => i.quantity > 10 || i.quantity < 1)) {
+      return NextResponse.json(
+        { success: false, error: 'Invalid items' },
+        { status: 400 }
+      );
+    }
+
     const orderId = generateOrderId();
     const automationSettings = await getSettings('automation') || {};
     const fraudSettings = await getSettings('fraud') || {};
@@ -52,16 +88,16 @@ export async function POST(request: NextRequest) {
 
     const orderData = {
       order_id: orderId,
-      customer_name,
-      customer_phone,
-      shipping_address,
+      customer_name: sanitizeString(customer_name),
+      customer_phone: sanitizeString(customer_phone, 20),
+      shipping_address: sanitizeString(shipping_address),
       area_id,
-      payment_method: payment_method || 'cod',
-      payment_status: payment_method === 'cod' ? 'pending' : 'paid',
-      subtotal,
-      delivery_charge: delivery_charge || 0,
-      discount: discount || 0,
-      total,
+      payment_method: sanitizeString(payment_method) || 'cod',
+      payment_status: sanitizeString(payment_method) === 'cod' ? 'pending' : 'paid',
+      subtotal: Math.max(0, Number(subtotal) || 0),
+      delivery_charge: Math.max(0, Number(delivery_charge) || 0),
+      discount: Math.max(0, Number(discount) || 0),
+      total: Math.max(0, Number(total) || 0),
       status: 'pending',
       fraud_score: fraudCheckResult?.fraud_score || null,
       fraud_flag: fraudCheckResult?.is_risky || false,

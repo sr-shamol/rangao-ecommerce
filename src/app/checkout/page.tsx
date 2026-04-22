@@ -91,10 +91,39 @@ export default function CheckoutPage() {
       return;
     }
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const orderId = generateOrderId();
-    clearCart();
-    router.push(`/order/${orderId}`);
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: formData.name,
+          customer_phone: phone,
+          shipping_address: `${formData.address}, ${formData.area}, ${currentDistrict?.label}`,
+          payment_method: selectedPayment,
+          items: items.map(item => ({
+            product_id: item.product.id,
+            quantity: item.quantity,
+            price: item.product.price,
+            variant: item.variant?.name,
+          })),
+          subtotal,
+          delivery_charge: deliveryCharge,
+          discount,
+          total,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        clearCart();
+        router.push(`/order/${data.order_id}`);
+      } else {
+        alert(data.error || 'Failed to place order');
+      }
+    } catch (err) {
+      alert('Order failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (items.length === 0) {
