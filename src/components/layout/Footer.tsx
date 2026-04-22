@@ -36,7 +36,7 @@ export function Footer() {
             </p>
             <div className="flex gap-3">
               <a
-                href="https://wa.me/8801XXXXXXXXX"
+                href="https://wa.me/8801973811114"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-colors"
@@ -87,7 +87,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-2 text-white/70 text-sm">
                 <Phone size={18} className="flex-shrink-0" />
-                <a href="tel:+8801XXXXXXXXX">+880 1XX XXX XXX</a>
+                <a href="tel:+8801973811114">+880 1973 811114</a>
               </li>
               <li className="flex items-center gap-2 text-white/70 text-sm">
                 <Mail size={18} className="flex-shrink-0" />

@@ -198,7 +198,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     Buy Now
                   </Button>
                   <a
-                    href={`https://wa.me/8801XXXXXXXXX?text=${whatsappMessage}`}
+                    href={`https://wa.me/8801973811114?text=${whatsappMessage}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1"

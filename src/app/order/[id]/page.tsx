@@ -114,7 +114,7 @@ export default function OrderConfirmPage({ params }: OrderConfirmPageProps) {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <a
-                    href="https://wa.me/8801XXXXXXXXX"
+                    href="https://wa.me/8801973811114"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex-1"
@@ -124,7 +124,7 @@ export default function OrderConfirmPage({ params }: OrderConfirmPageProps) {
                       WhatsApp
                     </Button>
                   </a>
-                  <a href="tel:+8801XXXXXXXXX" className="flex-1">
+                  <a href="tel:+8801973811114" className="flex-1">
                     <Button variant="outline" className="w-full gap-2">
                       <Phone size={18} />
                       Call Us
